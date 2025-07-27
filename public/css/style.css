@@ -1,0 +1,70 @@
+:root {
+  --primary-color: #8e24aa; /* Deep Purple */
+  --primary-dark: #5c007a;
+  --primary-light: #c158dc;
+  --accent-color: #ff9800; /* Orange */
+  --accent-dark: #c66900;
+  --accent-light: #ffc947;
+  --danger-color: #d32f2f;
+  --success-color: #fbc02d;
+  --info-color: #ffb300;
+  --light-color: #f8f9fa;
+  --dark-color: #212121;
+}
+
+.navbar, .navbar-dark.bg-purple {
+  background-color: var(--primary-color) !important;
+}
+
+.btn, .btn-primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: #fff !important;
+}
+
+.btn:hover, .btn-primary:hover, .btn:focus, .btn-primary:focus {
+  background-color: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+  color: #fff !important;
+}
+
+.btn-outline-secondary {
+  color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  background: transparent !important;
+}
+
+.btn-outline-secondary:hover, .btn-outline-secondary:focus {
+  background-color: var(--primary-color) !important;
+  color: #fff !important;
+  border-color: var(--primary-dark) !important;
+}
+
+.btn-outline-danger {
+  color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  background: transparent !important;
+}
+
+.btn-outline-danger:hover, .btn-outline-danger:focus {
+  background-color: var(--primary-color) !important;
+  color: #fff !important;
+  border-color: var(--primary-dark) !important;
+}
+
+.bg-purple {
+  background-color: var(--primary-color) !important;
+}
+
+.text-purple {
+  color: var(--primary-color) !important;
+}
+
+footer.bg-purple {
+  background-color: var(--primary-color) !important;
+}
+
+body {
+  background-color: var(--light-color);
+  color: var(--dark-color);
+} 

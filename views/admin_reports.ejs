@@ -1,0 +1,193 @@
+<%- include('partials/admin_header') %>
+<div class="container fade-in mt-5">
+  <h2 class="mb-4">Admin Reports</h2>
+  <form class="row g-3 mb-4" method="get" action="/admin/reports">
+    <div class="col-md-3">
+      <label class="form-label">From</label>
+      <input type="date" name="from" class="form-control" value="<%= typeof from !== 'undefined' ? from : '' %>">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">To</label>
+      <input type="date" name="to" class="form-control" value="<%= typeof to !== 'undefined' ? to : '' %>">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Subject</label>
+      <input type="text" name="subject" class="form-control" value="<%= typeof subject !== 'undefined' ? subject : '' %>">
+    </div>
+    <div class="col-md-3 d-flex align-items-end">
+      <button class="btn btn-primary w-100">Filter</button>
+    </div>
+  </form>
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Total Users</h5>
+          <ul class="list-group">
+            <% userCounts.forEach(function(u) { %>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <%= u.role.charAt(0).toUpperCase() + u.role.slice(1) %>
+                <span class="badge bg-primary rounded-pill"><%= u.get('count') %></span>
+              </li>
+            <% }) %>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Total Teaching Records</h5>
+          <span class="display-6"><%= totalRecords %></span>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Average Rating</h5>
+          <span class="display-6"><%= avgRating %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="mb-4">
+    <a href="/admin/reports/export" class="btn btn-success">Export All Records as CSV</a>
+  </div>
+  <div class="row mb-4">
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Records Per Month</h5>
+          <canvas id="recordsPerMonth"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Average Rating Per Month</h5>
+          <canvas id="avgRatingPerMonth"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Records Per Subject</h5>
+          <canvas id="recordsPerSubject"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Assigned vs. Actual Periods (This Week)</h5>
+          <table class="table table-bordered table-hover bg-white">
+            <thead class="table-primary">
+              <tr>
+                <th>Teacher</th>
+                <th>Assigned Periods/Week</th>
+                <th>Actual Periods (This Week)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (periodStats || []).forEach(function(stat) { %>
+                <tr>
+                  <td><%= stat.name %></td>
+                  <td><%= stat.assigned %></td>
+                  <td><%= stat.actual %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Teacher Performance</h5>
+          <table class="table table-bordered table-hover bg-white">
+            <thead class="table-primary">
+              <tr>
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Assigned Periods/Week</th>
+                <th>Periods Attended (Submitted)</th>
+                <th>Performance (%)</th>
+                <th>Average Rating</th>
+                <th>Latest Headmaster Feedback</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (teacherStats || []).forEach(function(stat) { %>
+                <tr>
+                  <td><%= stat.id %></td>
+                  <td><%= stat.name %></td>
+                  <td><%= stat.email %></td>
+                  <td><%= stat.assigned %></td>
+                  <td><%= stat.submitted %></td>
+                  <td><%= stat.assigned > 0 ? Math.round((stat.submitted / stat.assigned) * 100) : '-' %></td>
+                  <td><%= stat.avgRating %></td>
+                  <td><%= stat.feedback %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a href="/admin" class="btn btn-outline-secondary">Back to Admin Panel</a>
+</div>
+<%- include('partials/footer') %>
+<script>
+  // Data for charts (injected from server)
+  const recordsPerMonth = <%- JSON.stringify(recordsPerMonth || []) %>;
+  const avgRatingPerMonth = <%- JSON.stringify(avgRatingPerMonth || []) %>;
+  const recordsPerSubject = <%- JSON.stringify(recordsPerSubject || []) %>;
+
+  // Records Per Month Chart
+  new Chart(document.getElementById('recordsPerMonth'), {
+    type: 'bar',
+    data: {
+      labels: recordsPerMonth.map(r => r.month),
+      datasets: [{
+        label: 'Records',
+        data: recordsPerMonth.map(r => r.count),
+        backgroundColor: '#0d6efd'
+      }]
+    }
+  });
+  // Average Rating Per Month Chart
+  new Chart(document.getElementById('avgRatingPerMonth'), {
+    type: 'line',
+    data: {
+      labels: avgRatingPerMonth.map(r => r.month),
+      datasets: [{
+        label: 'Avg Rating',
+        data: avgRatingPerMonth.map(r => r.avg),
+        borderColor: '#198754',
+        backgroundColor: 'rgba(25,135,84,0.1)',
+        fill: true
+      }]
+    }
+  });
+  // Records Per Subject Chart
+  new Chart(document.getElementById('recordsPerSubject'), {
+    type: 'pie',
+    data: {
+      labels: recordsPerSubject.map(r => r.subject),
+      datasets: [{
+        label: 'Records',
+        data: recordsPerSubject.map(r => r.count),
+        backgroundColor: ['#0d6efd', '#6610f2', '#6f42c1', '#d63384', '#fd7e14', '#ffc107', '#198754', '#20c997', '#0dcaf0', '#6c757d']
+      }]
+    }
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

@@ -1,0 +1,39 @@
+<%- include('partials/user_header') %>
+<style>
+  .login-bg { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #8e24aa 0%, #ff9800 100%); }
+  .login-card { background: rgba(142,36,170,0.85); border-radius: 2.5rem; box-shadow: 0 8px 32px 0 rgba(31,38,135,0.37); border: 1px solid rgba(255,255,255,0.18); color: #fff; animation: fadeIn 1s; width: 100%; max-width: 420px; min-height: 420px; margin: 0 auto; display: flex; align-items: center; position: relative; }
+  .login-card .card-body { width: 100%; }
+  .login-card .form-control { border-radius: 2rem; border: none; box-shadow: none; }
+  .login-card .btn-primary { border-radius: 2rem; font-weight: bold; background: #fff !important; color: #8e24aa !important; border: none; }
+  .login-card .btn-primary:hover { background: #c158dc !important; color: #fff !important; }
+  .login-logo-bg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.15; width: 80%; height: 80%; z-index: 0; pointer-events: none; }
+  .login-card .card-body { position: relative; z-index: 1; }
+  .forgot-link { color: #fff; text-decoration: underline; font-size: 1rem; transition: color 0.2s; }
+  .forgot-link:hover { color: #ff9800; text-decoration: underline; }
+</style>
+<div class="login-bg">
+  <div class="login-card shadow-lg border-0">
+    <img src="/images/logo.jpg" alt="Logo" class="login-logo-bg">
+    <div class="card-body p-5">
+      <h2 class="card-title mb-4 text-center">Login</h2>
+      <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+      <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+      <form method="post" autocomplete="off">
+        <div class="mb-3">
+          <input name="email" type="email" class="form-control" placeholder="Email" required>
+        </div>
+        <div class="mb-3">
+          <input name="password" type="password" class="form-control" placeholder="Password" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Login</button>
+      </form>
+      <div class="text-center mt-3">
+        <a href="/forgot-password" class="forgot-link">Forgot password?</a>
+      </div>
+      <div class="text-center mt-3">
+        <a href="/register" class="text-white">Don't have an account? Register</a>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('partials/footer') %> 

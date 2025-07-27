@@ -1,0 +1,18 @@
+<%- include('partials/user_header') %>
+<div class="container fade-in mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+      <img src="/images/logo.jpg" alt="Logo" height="80" class="mb-4"/>
+      <h1 class="display-4 mb-3">Welcome</h1>
+      <% if (user) { %>
+        <p class="lead">Hello, <%= user.firstName %>!</p>
+        <a href="/dashboard" class="btn btn-success btn-lg me-2">Dashboard</a>
+        <a href="/logout" class="btn btn-outline-danger btn-lg">Logout</a>
+      <% } else { %>
+        <a href="/register" class="btn btn-primary btn-lg me-2">Register</a>
+        <a href="/login" class="btn btn-outline-secondary btn-lg">Login</a>
+      <% } %>
+    </div>
+  </div>
+</div>
+<%- include('partials/footer') %> 
