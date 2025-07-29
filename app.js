@@ -36,11 +36,11 @@ const resetLimiter = rateLimit({
 
 // DB setup
 const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
+  process.env.DB_NAME || 'teaching_system',
+  process.env.DB_USER || 'postgres',
+  process.env.DB_PASSWORD || 'password',
   {
-    host: process.env.DB_HOST,
+    host: process.env.DB_HOST || 'localhost',
     dialect: 'postgres',
     logging: false
   }
@@ -350,19 +350,43 @@ app.post('/records/:id/status', async (req, res) => {
 // Admin panel: list users, change role, delete user, set periodsPerWeek
 app.get('/admin', isAdmin, async (req, res) => {
   const users = await User.findAll({ order: [['role', 'ASC'], ['lastName', 'ASC']] });
-  // Compute periods attended and latest feedback for each teacher
+  const teacherIds = users.filter(u => u.role === 'teacher').map(u => u.id);
+
+  // Batch query: submitted counts for all teachers
+  const submittedCounts = await TeachingRecord.findAll({
+    attributes: ['userId', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
+    where: { userId: teacherIds, status: 'submitted' },
+    group: ['userId']
+  });
+  const submittedMap = {};
+  submittedCounts.forEach(row => {
+    submittedMap[row.userId] = parseInt(row.get('count'), 10);
+  });
+
+  // Batch query: latest feedback for all teachers
+  // Get all records with feedback for these teachers, order by updatedAt DESC
+  const feedbackRecords = await TeachingRecord.findAll({
+    attributes: ['userId', 'feedback', 'updatedAt'],
+    where: {
+      userId: teacherIds,
+      feedback: { [Op.ne]: null }
+    },
+    order: [['userId', 'ASC'], ['updatedAt', 'DESC']]
+  });
+  // For each teacher, pick the latest feedback
+  const feedbackMap = {};
+  feedbackRecords.forEach(row => {
+    if (!feedbackMap[row.userId]) {
+      feedbackMap[row.userId] = row.feedback;
+    }
+  });
+
+  // Build teacherPeriods
   const teacherPeriods = {};
   for (const user of users.filter(u => u.role === 'teacher')) {
-    // Count submitted records
-    const submitted = await TeachingRecord.count({ where: { userId: user.id, status: 'submitted' } });
-    // Get latest feedback from headmaster
-    const latest = await TeachingRecord.findOne({
-      where: { userId: user.id, feedback: { [Op.ne]: null } },
-      order: [['updatedAt', 'DESC']]
-    });
     teacherPeriods[user.id] = {
-      submitted,
-      feedback: latest ? latest.feedback : null
+      submitted: submittedMap[user.id] || 0,
+      feedback: feedbackMap[user.id] || null
     };
   }
   res.render('admin_panel', { users, teacherPeriods });

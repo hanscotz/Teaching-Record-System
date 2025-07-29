@@ -200,7 +200,7 @@
           <h5 class="card-title mb-0">This Week's Teaching Records</h5>
         </div>
         <div class="card-body">
-          <% if (typeof weekRecords !== 'undefined' && weekRecords.length > 0) { %>
+            <% if (typeof weekRecords !== 'undefined' && weekRecords.length > 0) { %>
             <div class="table-responsive">
               <table class="table table-hover">
                 <thead class="table-light">
@@ -214,7 +214,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <% weekRecords.forEach(function(rec) { %>
+              <% weekRecords.forEach(function(rec) { %>
                     <tr>
                       <td><%= rec.date %></td>
                       <td><%= rec.class %></td>
@@ -238,16 +238,16 @@
                         <% } %>
                       </td>
                     </tr>
-                  <% }) %>
+              <% }) %>
                 </tbody>
               </table>
             </div>
-          <% } else { %>
+            <% } else { %>
             <div class="text-center py-4">
               <p class="text-muted">No records for this week yet.</p>
               <a href="/records/new" class="btn btn-primary">Create Your First Record</a>
             </div>
-          <% } %>
+            <% } %>
         </div>
       </div>
     </div>
