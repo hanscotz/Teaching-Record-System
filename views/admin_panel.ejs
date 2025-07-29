@@ -67,6 +67,19 @@
                 <input type="number" name="periodsPerWeek" value="<%= user.periodsPerWeek %>" min="0" class="form-control form-control-sm d-inline w-auto" style="width:80px;display:inline-block;" onchange="this.form.submit()" title="Assigned periods per week">
                 <span class="small">periods/week</span>
               </form>
+              <form action="/admin/user/<%= user.id %>/periodsPerDay" method="post" class="d-block mt-2 periods-per-day-form">
+                <div class="d-flex align-items-center flex-wrap gap-1">
+                  <% const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']; %>
+                  <% days.forEach(function(day) { %>
+                    <div class="input-group input-group-sm" style="width:90px;">
+                      <span class="input-group-text"><%= day %></span>
+                      <input type="number" name="periodsPerDay[<%= day %>]" min="0" max="<%= user.periodsPerWeek %>" value="<%= user.periodsPerDay && user.periodsPerDay[day] ? user.periodsPerDay[day] : 0 %>" class="form-control form-control-sm period-input" style="width:40px;">
+                    </div>
+                  <% }) %>
+                  <button type="submit" class="btn btn-sm btn-outline-primary ms-2">Save</button>
+                  <span class="ms-2 small">Sum: <span class="day-sum">0</span> / <%= user.periodsPerWeek %></span>
+                </div>
+              </form>
             <% } %>
           </td>
           <td>
@@ -118,5 +131,44 @@
 </div>
 <%- include('partials/footer') %>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('form.periods-per-day-form').forEach(function(form) {
+    function updateDaySum() {
+      var sum = 0;
+      var max = parseInt(form.closest('tr').querySelector('input[name="periodsPerWeek"]').value) || 0;
+      form.querySelectorAll('input.period-input').forEach(function(inp) {
+        sum += parseInt(inp.value) || 0;
+      });
+      var daySumSpan = form.querySelector('.day-sum');
+      if (daySumSpan) {
+        daySumSpan.textContent = sum;
+        if (sum !== max) {
+          daySumSpan.style.color = 'red';
+          form.querySelector('button[type=submit]').disabled = true;
+        } else {
+          daySumSpan.style.color = 'green';
+          form.querySelector('button[type=submit]').disabled = false;
+        }
+      }
+      // Prevent any input from being set so high that the sum would exceed max
+      form.querySelectorAll('input.period-input').forEach(function(inp) {
+        inp.max = max;
+        inp.oninput = function() {
+          var currentSum = 0;
+          form.querySelectorAll('input.period-input').forEach(function(otherInp) {
+            if (otherInp !== inp) currentSum += parseInt(otherInp.value) || 0;
+          });
+          var allowed = max - currentSum;
+          if (parseInt(inp.value) > allowed) inp.value = allowed;
+          updateDaySum();
+        };
+      });
+    }
+    updateDaySum(); // Run once on page load
+    form.addEventListener('input', updateDaySum);
+  });
+});
+</script>
 </body>
 </html> 

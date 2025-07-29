@@ -80,6 +80,7 @@
               <tbody>
                 <% 
                   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                  const dbDays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
                   const weekStart = new Date();
                   weekStart.setDate(weekStart.getDate() - weekStart.getDay());
                   
@@ -93,12 +94,13 @@
                     const isPast = currentDate < new Date();
                     const isFuture = currentDate > new Date();
                     const isWeekend = i === 0 || i === 6;
+                    const assignedToday = user.periodsPerDay && user.periodsPerDay[dbDays[i]] ? user.periodsPerDay[dbDays[i]] : 0;
                 %>
                 <tr class="<%= isToday ? 'table-primary' : '' %>">
                   <td><strong><%= days[i] %></strong></td>
                   <td><%= currentDate.toLocaleDateString() %></td>
                   <td>
-                    <span class="badge bg-secondary"><%= isWeekend ? 0 : (periodStats ? periodStats.assignedPerDay : 0) %></span>
+                    <span class="badge bg-secondary"><%= assignedToday %></span>
                   </td>
                   <td>
                     <span class="badge bg-success"><%= completedToday %></span>
@@ -108,7 +110,7 @@
                       <span class="badge bg-light text-dark">Weekend</span>
                     <% } else if (isFuture) { %>
                       <span class="badge bg-info">Upcoming</span>
-                    <% } else if (completedToday >= (periodStats ? periodStats.assignedPerDay : 0)) { %>
+                    <% } else if (completedToday >= assignedToday) { %>
                       <span class="badge bg-success">Complete</span>
                     <% } else if (completedToday > 0) { %>
                       <span class="badge bg-warning">Partial</span>

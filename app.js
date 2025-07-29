@@ -54,6 +54,11 @@ const User = sequelize.define('User', {
   password: { type: Sequelize.STRING, allowNull: false },
   role: { type: Sequelize.ENUM('teacher', 'headmaster', 'admin'), allowNull: false, defaultValue: 'teacher' },
   periodsPerWeek: { type: Sequelize.INTEGER, allowNull: false, defaultValue: 0 },
+  periodsPerDay: {
+    type: Sequelize.JSON,
+    allowNull: false,
+    defaultValue: { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 }
+  },
   resetPasswordCode: { type: Sequelize.STRING },
   resetPasswordExpires: { type: Sequelize.DATE }
 });
@@ -264,10 +269,21 @@ app.post('/records/new', async (req, res) => {
   if (!req.session.user) return res.redirect('/login');
   const { date, class: className, subject, period, topic, subtopic, teacherWork, studentWork, remarks } = req.body;
   if (!date || !className || !subject || !period || !topic || !teacherWork || !studentWork) {
-    return res.render('record_new', { error: 'All required fields must be filled.' });
+    return res.render('record_new', { error: 'All required fields must be filled.', prefillDate: date });
+  }
+  // Fetch the latest user data
+  const user = await User.findByPk(req.session.user.id);
+  // Count how many records already exist for this user on this date
+  const existingCount = await TeachingRecord.count({ where: { userId: user.id, date } });
+  // Get the assigned periods for this day
+  const dbDays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const dayIdx = new Date(date).getDay();
+  const assignedToday = user.periodsPerDay && user.periodsPerDay[dbDays[dayIdx]] ? user.periodsPerDay[dbDays[dayIdx]] : 0;
+  if (existingCount >= assignedToday) {
+    return res.render('record_new', { error: `You have reached your assigned period limit (${assignedToday}) for this day.`, prefillDate: date });
   }
   await TeachingRecord.create({
-    date, class: className, subject, period, topic, subtopic, teacherWork, studentWork, remarks, userId: req.session.user.id
+    date, class: className, subject, period, topic, subtopic, teacherWork, studentWork, remarks, userId: user.id
   });
   res.redirect('/records');
 });
@@ -351,6 +367,34 @@ app.get('/admin', isAdmin, async (req, res) => {
   }
   res.render('admin_panel', { users, teacherPeriods });
 });
+
+// Allow admin to update attended periods for a teacher
+app.post('/admin/user/:id/attended', isAdmin, async (req, res) => {
+  const { attended } = req.body;
+  const userId = req.params.id;
+  // Find all submitted records for this teacher
+  const records = await TeachingRecord.findAll({ where: { userId, status: 'submitted' }, order: [['date', 'DESC']] });
+  // If attended is less than current, delete the most recent records
+  if (records.length > attended) {
+    const toDelete = records.slice(0, records.length - attended);
+    for (const rec of toDelete) {
+      await rec.destroy();
+    }
+  }
+  res.redirect('/admin');
+});
+
+// Allow admin to update latest headmaster feedback for a teacher
+app.post('/admin/user/:id/feedback', isAdmin, async (req, res) => {
+  const { feedback } = req.body;
+  const userId = req.params.id;
+  // Find the most recent submitted record for this teacher
+  const record = await TeachingRecord.findOne({ where: { userId, status: 'submitted' }, order: [['updatedAt', 'DESC']] });
+  if (record) {
+    await record.update({ feedback });
+  }
+  res.redirect('/admin');
+});
 app.post('/admin/user/:id/role', isAdmin, async (req, res) => {
   const { role } = req.body;
   await User.update({ role }, { where: { id: req.params.id } });
@@ -359,6 +403,26 @@ app.post('/admin/user/:id/role', isAdmin, async (req, res) => {
 app.post('/admin/user/:id/periods', isAdmin, async (req, res) => {
   const { periodsPerWeek } = req.body;
   await User.update({ periodsPerWeek }, { where: { id: req.params.id } });
+  res.redirect('/admin');
+});
+app.post('/admin/user/:id/periodsPerDay', isAdmin, async (req, res) => {
+  const { periodsPerDay } = req.body;
+  // Convert string values to numbers
+  const perDay = {};
+  let sum = 0;
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  days.forEach(day => {
+    perDay[day] = parseInt(periodsPerDay[day]) || 0;
+    sum += perDay[day];
+  });
+  const user = await User.findByPk(req.params.id);
+  if (!user) return res.redirect('/admin');
+  if (sum !== user.periodsPerWeek) {
+    // Optionally, set a flash message for error
+    req.session.error = 'Sum of periods per day must match assigned periods per week.';
+    return res.redirect('/admin');
+  }
+  await User.update({ periodsPerDay: perDay }, { where: { id: req.params.id } });
   res.redirect('/admin');
 });
 app.post('/admin/user/:id/delete', isAdmin, async (req, res) => {
