@@ -121,6 +121,16 @@ function isAdmin(req, res, next) {
   res.redirect('/dashboard');
 }
 
+// Test route to check database connection
+app.get('/test', async (req, res) => {
+  try {
+    await sequelize.authenticate();
+    res.send('Database connection successful');
+  } catch (error) {
+    res.status(500).send('Database connection failed: ' + error.message);
+  }
+});
+
 // Home
 app.get('/', (req, res) => {
   res.render('index');
@@ -172,22 +182,10 @@ app.get('/dashboard', async (req, res) => {
   if (!req.session.user) return res.redirect('/login');
   if (req.session.user.role === 'admin') return res.redirect('/admin');
   if (req.session.user.role === 'headmaster') return res.redirect('/headmaster');
-  // Teacher dashboard: show weekly activity
-  let weekRecords = [];
-  if (req.session.user.role === 'teacher') {
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
-    weekRecords = await TeachingRecord.findAll({
-      where: {
-        userId: req.session.user.id,
-        date: { [Op.between]: [weekStart, weekEnd] }
-      },
-      order: [['date', 'ASC']]
-    });
-  }
-  res.render('dashboard', { user: req.session.user, weekRecords });
+  if (req.session.user.role === 'teacher') return res.redirect('/teacher');
+  
+  // Fallback for any other roles
+  res.redirect('/login');
 });
 
 // Logout
@@ -257,7 +255,8 @@ app.get('/records', async (req, res) => {
 // Show form to create new record
 app.get('/records/new', (req, res) => {
   if (!req.session.user) return res.redirect('/login');
-  res.render('record_new', { error: null });
+  const { date } = req.query;
+  res.render('record_new', { error: null, prefillDate: date });
 });
 
 // Handle new record submission
@@ -481,6 +480,77 @@ app.get('/admin/reports/export', isAdmin, async (req, res) => {
   res.header('Content-Type', 'text/csv');
   res.attachment('teaching_records.csv');
   res.send(csv);
+});
+
+// Teacher panel: dedicated teacher dashboard with assigned periods logic
+app.get('/teacher', isTeacher, async (req, res) => {
+  try {
+    // Always fetch the latest user data
+    const user = await User.findByPk(req.session.user.id);
+
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+
+    // Get weekly records
+    const weekRecords = await TeachingRecord.findAll({
+      where: {
+        userId: user.id,
+        date: { [Op.between]: [weekStart, weekEnd] }
+      },
+      order: [['date', 'ASC']]
+    });
+
+    // Calculate period statistics
+    const completedThisWeek = weekRecords.filter(r => r.status === 'submitted' || r.status === 'reviewed').length;
+    const submittedThisWeek = weekRecords.filter(r => r.status === 'submitted').length;
+    const reviewedThisWeek = weekRecords.filter(r => r.status === 'reviewed').length;
+    const draftThisWeek = weekRecords.filter(r => r.status === 'draft').length;
+
+    // Calculate monthly statistics
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    const monthEnd = new Date();
+    monthEnd.setMonth(monthEnd.getMonth() + 1);
+    monthEnd.setDate(0);
+    monthEnd.setHours(23, 59, 59, 999);
+
+    const monthlyRecords = await TeachingRecord.findAll({
+      where: {
+        userId: user.id,
+        date: { [Op.between]: [monthStart, monthEnd] }
+      }
+    });
+
+    const completedThisMonth = monthlyRecords.filter(r => r.status === 'submitted' || r.status === 'reviewed').length;
+
+    // Calculate daily assigned periods (assuming 5 working days)
+    const dailyAssigned = Math.ceil((user.periodsPerWeek || 0) / 5);
+
+    const periodStats = {
+      assignedPerWeek: user.periodsPerWeek || 0,
+      assignedPerDay: dailyAssigned,
+      completedThisWeek,
+      submittedThisWeek,
+      reviewedThisWeek,
+      draftThisWeek,
+      completedThisMonth,
+      remainingThisWeek: Math.max(0, (user.periodsPerWeek || 0) - completedThisWeek),
+      progressPercentage: user.periodsPerWeek > 0 ? 
+        Math.round((completedThisWeek / user.periodsPerWeek) * 100) : 0
+    };
+
+    res.render('teacher_panel', {
+      user, // pass the fresh user object
+      weekRecords,
+      periodStats
+    });
+  } catch (error) {
+    console.error('Error in teacher panel:', error);
+    res.status(500).send('Internal Server Error: ' + error.message);
+  }
 });
 
 // Headmaster panel: view all records

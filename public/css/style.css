@@ -5,66 +5,362 @@
   --accent-color: #ff9800; /* Orange */
   --accent-dark: #c66900;
   --accent-light: #ffc947;
-  --danger-color: #d32f2f;
-  --success-color: #fbc02d;
-  --info-color: #ffb300;
+  --success-color: #4caf50;
+  --warning-color: #ff9800;
+  --danger-color: #f44336;
+  --info-color: #2196f3;
   --light-color: #f8f9fa;
-  --dark-color: #212121;
+  --dark-color: #343a40;
+  --white-color: #ffffff;
+  --gray-color: #6c757d;
+  --border-color: #dee2e6;
+  --shadow-color: rgba(0, 0, 0, 0.1);
 }
 
+/* Navbar styling */
 .navbar, .navbar-dark.bg-purple {
   background-color: var(--primary-color) !important;
+  box-shadow: 0 2px 4px var(--shadow-color);
 }
 
+.navbar-brand {
+  color: var(--white-color) !important;
+  font-weight: 600;
+}
+
+.navbar-nav .nav-link {
+  color: var(--white-color) !important;
+  transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+  color: var(--accent-light) !important;
+}
+
+/* Button styling */
 .btn, .btn-primary {
   background-color: var(--primary-color) !important;
   border-color: var(--primary-color) !important;
-  color: #fff !important;
+  color: var(--white-color) !important;
+  transition: all 0.3s ease;
 }
 
-.btn:hover, .btn-primary:hover, .btn:focus, .btn-primary:focus {
+.btn:hover, .btn-primary:hover {
   background-color: var(--primary-dark) !important;
   border-color: var(--primary-dark) !important;
-  color: #fff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px var(--shadow-color);
 }
 
-.btn-outline-secondary {
-  color: var(--primary-color) !important;
-  border-color: var(--primary-color) !important;
-  background: transparent !important;
+.btn-secondary {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: var(--white-color) !important;
 }
 
-.btn-outline-secondary:hover, .btn-outline-secondary:focus {
+.btn-secondary:hover {
+  background-color: var(--accent-dark) !important;
+  border-color: var(--accent-dark) !important;
+}
+
+.btn-success {
+  background-color: var(--success-color) !important;
+  border-color: var(--success-color) !important;
+}
+
+.btn-warning {
+  background-color: var(--warning-color) !important;
+  border-color: var(--warning-color) !important;
+}
+
+.btn-danger {
+  background-color: var(--danger-color) !important;
+  border-color: var(--danger-color) !important;
+}
+
+.btn-info {
+  background-color: var(--info-color) !important;
+  border-color: var(--info-color) !important;
+}
+
+/* Card styling */
+.card {
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 4px var(--shadow-color);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px var(--shadow-color);
+}
+
+.card-header {
   background-color: var(--primary-color) !important;
-  color: #fff !important;
-  border-color: var(--primary-dark) !important;
+  color: var(--white-color) !important;
+  border-bottom: 1px solid var(--primary-color) !important;
 }
 
-.btn-outline-danger {
-  color: var(--primary-color) !important;
-  border-color: var(--primary-color) !important;
-  background: transparent !important;
-}
-
-.btn-outline-danger:hover, .btn-outline-danger:focus {
+/* Table styling */
+.table thead th {
   background-color: var(--primary-color) !important;
-  color: #fff !important;
-  border-color: var(--primary-dark) !important;
+  color: var(--white-color) !important;
+  border-color: var(--primary-color) !important;
 }
 
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(142, 36, 170, 0.05) !important;
+}
+
+/* Alert styling */
+.alert-primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: var(--white-color) !important;
+}
+
+.alert-info {
+  background-color: var(--info-color) !important;
+  border-color: var(--info-color) !important;
+  color: var(--white-color) !important;
+}
+
+/* Badge styling */
+.badge-primary, .bg-primary {
+  background-color: var(--primary-color) !important;
+}
+
+.badge-info, .bg-info {
+  background-color: var(--info-color) !important;
+}
+
+/* Progress bar */
+.progress-bar {
+  background-color: var(--primary-color) !important;
+}
+
+/* Form controls */
+.form-control:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 0.2rem rgba(142, 36, 170, 0.25) !important;
+}
+
+.form-select:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 0.2rem rgba(142, 36, 170, 0.25) !important;
+}
+
+/* Pagination */
+.page-link {
+  color: var(--primary-color) !important;
+}
+
+.page-item.active .page-link {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+/* Footer */
 .bg-purple {
   background-color: var(--primary-color) !important;
 }
 
-.text-purple {
-  color: var(--primary-color) !important;
-}
-
-footer.bg-purple {
+/* Custom background classes */
+.bg-blue {
   background-color: var(--primary-color) !important;
 }
 
-body {
-  background-color: var(--light-color);
-  color: var(--dark-color);
+.bg-blue-light {
+  background-color: var(--primary-light) !important;
+}
+
+/* Text colors */
+.text-primary {
+  color: var(--primary-color) !important;
+}
+
+.text-blue {
+  color: var(--primary-color) !important;
+}
+
+/* Border colors */
+.border-primary {
+  border-color: var(--primary-color) !important;
+}
+
+/* Hover effects */
+.hover-blue:hover {
+  background-color: var(--primary-color) !important;
+  color: var(--white-color) !important;
+}
+
+/* Animation for fade-in */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Login/Register form styling */
+.auth-container {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.auth-card {
+  background: var(--white-color);
+  border-radius: 15px;
+  box-shadow: 0 10px 30px var(--shadow-color);
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: url('/images/logo.png') center/contain no-repeat;
+  opacity: 0.05;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.auth-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-title {
+  color: var(--primary-color);
+  font-weight: 700;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.auth-form .form-control {
+  border-radius: 10px;
+  border: 2px solid var(--border-color);
+  padding: 12px 15px;
+  transition: all 0.3s ease;
+}
+
+.auth-form .form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(142, 36, 170, 0.15);
+}
+
+.auth-form .btn {
+  border-radius: 10px;
+  padding: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.auth-links {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.auth-links a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-links a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+/* Dashboard cards */
+.dashboard-card {
+  background: var(--white-color);
+  border-radius: 10px;
+  box-shadow: 0 4px 6px var(--shadow-color);
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px var(--shadow-color);
+}
+
+.dashboard-card .card-body {
+  padding: 1.5rem;
+}
+
+.dashboard-card .card-title {
+  color: var(--primary-color);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.dashboard-card .card-text {
+  color: var(--gray-color);
+  font-size: 0.9rem;
+}
+
+/* Status badges */
+.status-draft {
+  background-color: var(--warning-color) !important;
+  color: var(--white-color) !important;
+}
+
+.status-submitted {
+  background-color: var(--success-color) !important;
+  color: var(--white-color) !important;
+}
+
+.status-reviewed {
+  background-color: var(--info-color) !important;
+  color: var(--white-color) !important;
+}
+
+/* Chart containers */
+.chart-container {
+  background: var(--white-color);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  margin-bottom: 20px;
+}
+
+/* Performance indicators */
+.performance-high {
+  color: var(--success-color);
+}
+
+.performance-medium {
+  color: var(--warning-color);
+}
+
+.performance-low {
+  color: var(--danger-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .auth-card {
+    padding: 30px 20px;
+    margin: 10px;
+  }
+  
+  .dashboard-card {
+    margin-bottom: 20px;
+  }
 } 

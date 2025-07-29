@@ -21,7 +21,11 @@
     </button>
     <div class="collapse navbar-collapse" id="userNavbar">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+        <% if (user && user.role === 'teacher') { %>
+          <li class="nav-item"><a class="nav-link" href="/teacher">Teacher Panel</a></li>
+        <% } else { %>
+          <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+        <% } %>
         <li class="nav-item"><a class="nav-link" href="/records">Records</a></li>
         <li class="nav-item"><a class="nav-link" href="/profile">Profile</a></li>
         <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
